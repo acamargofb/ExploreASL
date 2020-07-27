@@ -1,0 +1,7 @@
+# ignore macOS files:
+.DS_Store
+# ignore certain jsons:
+*.json
+*.txt
+*.docx
+*.doc
