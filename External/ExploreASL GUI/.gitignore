@@ -1,7 +1,7 @@
-# ignore macOS files:
 .DS_Store
-# ignore certain jsons:
 *.json
+*.xlsx
+*.xls
 *.txt
-*.docx
-*.doc
+*.todo
+*.pptx

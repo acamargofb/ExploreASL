@@ -1,13 +1,14 @@
 from PySide2.QtWidgets import *
 from PySide2.QtGui import *
 from PySide2.QtCore import *
-from xASL_GUI_ParmsMaker import xASL_ParmsMaker
+from xASL_GUI_ParmsMaker import xASL_ParmsMaker, DirectoryDragDrop_ListWidget
 from xASL_GUI_Executor import xASL_Executor
 from xASL_GUI_PostProc import xASL_PostProc
 import os
 import sys
 import json
-from platform import platform
+import platform
+import subprocess
 
 
 # Explore ASL Main Window
@@ -31,12 +32,12 @@ from platform import platform
 #  spinbox = DoubleSpinBox; vlay = vertical Layout
 
 
-# noinspection PyArgumentList,PyAttributeOutsideInit,PyUnresolvedReferences,PyCallByClass
+# noinspection PyAttributeOutsideInit
 class xASL_MainWin(QMainWindow):
     def __init__(self, config=None):
         super().__init__()
         # Load in the master config file if it exists; otherwise, make it
-        print(platform())
+        print(platform.system())
         if config is None:
             self.load_config()
         else:
@@ -70,6 +71,7 @@ class xASL_MainWin(QMainWindow):
         # Initialize the navigator and essential characteristics
         self.dock_navigator = QDockWidget("Explore ASL Navigator", self)
         self.dock_navigator.setFeatures(QDockWidget.AllDockWidgetFeatures)
+        self.dock_navigator.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
         self.dock_navigator.setMinimumSize(480, 480)
         self.dock_navigator.setWindowIcon(self.icon_main)
         # The main container and the main layout of the dock
@@ -204,7 +206,7 @@ class xASL_MainWin(QMainWindow):
             self.config = {"ExploreASLRoot": "",  # The filepath to the ExploreASL directory
                            "DefaultRootDir": f"{os.getcwd()}",  # The default root for the navigator to watch from
                            "ScriptsDir": f"{os.getcwd()}",  # The location of where this script is launched from
-                           "Platform": f"{platform()}",
+                           "Platform": f"{platform.system()}",
                            "DeveloperMode": False}  # Whether to launch the app in developer mode or not
             self.save_config()
 
@@ -214,13 +216,14 @@ class xASL_MainWin(QMainWindow):
                 self.tooltips = json.load(f)
 
     # Sets the analysis directory the user is interested in
+    # noinspection PyCallByClass
     def set_analysis_dir(self):
         result = QFileDialog.getExistingDirectory(self,
                                                   "Select analysis directory to view",  # Window title
                                                   self.config["DefaultRootDir"],  # Default dir
                                                   QFileDialog.ShowDirsOnly)  # Display options
         if result:
-            if '/' in result and "windows" in platform().lower():
+            if '/' in result and platform.system() == "Windows":
                 result = result.replace("/", "\\")
             # Change the display and have the navigator adjust according
             self.le_currentanalysis_dir.setText(result)
@@ -240,7 +243,7 @@ class xASL_MainWin(QMainWindow):
                                                        os.getcwd(),  # Default dir
                                                        QFileDialog.ShowDirsOnly)  # Display options
         if result:
-            if '/' in result and "windows" in platform().lower():
+            if '/' in result and platform.system() == "Windows":
                 result = result.replace("/", "\\")
             self.le_exploreasl_dir.setText(result)
             self.config["ExploreASLRoot"] = result
@@ -249,7 +252,17 @@ class xASL_MainWin(QMainWindow):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    app.setStyle("Fusion")
+    # Get the appropriate default style based on the user's operating system
+    if platform.system() == "Windows":  # Windows
+        app.setStyle("Fusion")
+    elif platform.system() == "Darwin":  # Mac
+        app.setStyle("macintosh")
+    elif platform.system() == "Linux":  # Linux
+        app.setStyle("Fusion")
+    else:
+        print("This program does not support your operating system")
+        sys.exit()
+
     app.setWindowIcon(QIcon(os.path.join(os.getcwd(), "media", "ExploreASL_logo.jpg")))
     # Check if the master config file exists; if it doesn't, the app will initialize one on the first startup
     if os.path.exists(os.path.join(os.getcwd(), "ExploreASL_GUI_masterconfig.json")):
