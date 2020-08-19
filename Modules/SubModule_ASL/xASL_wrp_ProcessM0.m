@@ -187,8 +187,8 @@ if x.M0_conventionalProcessing
     xASL_io_SaveNifti(x.P.Path_rM0, x.P.Path_mask_M0, M0_im>0,8,0);
 
     % also transform to standard space
-    InList          = {x.P.Path_rM0;x.P.Path_mask_M0};
-    OutList         = {x.P.Pop_Path_M0;x.P.Pop_Path_mask_M0};
+    InList = {x.P.Path_rM0;x.P.Path_mask_M0};
+    OutList = {x.P.Pop_Path_M0;x.P.Pop_Path_mask_M0};
     
     if exist(x.P.Path_mean_PWI_Clipped_sn_mat, 'file') % BACKWARDS COMPATIBILITY, CAN BE REMOVED
         AffineTransfPath = x.P.Path_mean_PWI_Clipped_sn_mat;
@@ -199,7 +199,7 @@ if x.M0_conventionalProcessing
     xASL_spm_deformations(x, InList, OutList, 1, [], AffineTransfPath, x.P.Path_y_ASL);
 
     % mask in standard space (native space masking already done)
-    maskIM          = xASL_io_Nifti2Im(x.P.Pop_Path_M0) .* (xASL_io_Nifti2Im(x.P.Pop_Path_mask_M0)==1);
+    maskIM = xASL_io_Nifti2Im(x.P.Pop_Path_M0) .* (xASL_io_Nifti2Im(x.P.Pop_Path_mask_M0)==1);
     xASL_io_SaveNifti(x.P.Pop_Path_M0,x.P.Pop_Path_M0,maskIM,8,0);
 
     % delete temporary files
